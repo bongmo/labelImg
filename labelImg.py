@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf8 -*-
+#-*- coding: utf8 -*-
 import _init_path
 import os.path
 import re
@@ -77,6 +77,7 @@ class MainWindow(QMainWindow, WindowMixin):
         # Main widgets and related state.
         self.labelDialog = LabelDialog(parent=self, listItem=self.labelHist)
         self.labelList = QListWidget()
+        self.className = None
         self.itemsToShapes = {}
         self.shapesToItems = {}
 
@@ -161,6 +162,9 @@ class MainWindow(QMainWindow, WindowMixin):
         color2 = action('Box &Fill Color', self.chooseColor2,
                 'Ctrl+Shift+L', 'color', u'Choose Box fill color')
 
+        createLabel = action('Create\nLabel', self.createLabelInfo,
+                'Ctrl+G', 'label', u'Create label information', enabled=False)
+
         createMode = action('Create\nRectBox', self.setCreateMode,
                 'Ctrl+N', 'new', u'Start drawing Boxs', enabled=False)
         editMode = action('&Edit\nRectBox', self.setEditMode,
@@ -243,7 +247,7 @@ class MainWindow(QMainWindow, WindowMixin):
         # Store actions for further handling.
         self.actions = struct(save=save, saveAs=saveAs, open=open, close=close,
                 lineColor=color1, fillColor=color2,
-                create=create, delete=delete, edit=edit, copy=copy,
+                create=create, delete=delete, edit=edit, copy=copy, createLabel=createLabel,
                 createMode=createMode, editMode=editMode, advancedMode=advancedMode,
                 shapeLineColor=shapeLineColor, shapeFillColor=shapeFillColor,
                 zoom=zoom, zoomIn=zoomIn, zoomOut=zoomOut, zoomOrg=zoomOrg,
@@ -285,7 +289,7 @@ class MainWindow(QMainWindow, WindowMixin):
 
         self.tools = self.toolbar('Tools')
         self.actions.beginner = (
-            open, opendir, openNextImg, openPrevImg, save, None, create, copy, delete, None,
+            open, opendir, openNextImg, openPrevImg, save, None, createLabel, create, copy, delete, None,
             zoomIn, zoom, zoomOut, fitWindow, fitWidth)
 
         self.actions.advanced = (
@@ -401,6 +405,7 @@ class MainWindow(QMainWindow, WindowMixin):
         self.dirty = False
         self.actions.save.setEnabled(False)
         self.actions.create.setEnabled(True)
+        self.actions.createLabel.setEnabled(True)
 
     def toggleActions(self, value=True):
         """Enable/Disable widgets which depend on an opened image."""
@@ -466,6 +471,15 @@ class MainWindow(QMainWindow, WindowMixin):
         self.canvas.setEditing(edit)
         self.actions.createMode.setEnabled(edit)
         self.actions.editMode.setEnabled(not edit)
+
+    def createLabelInfo(self):
+        assert self.beginner()
+        text = self.labelDialog.popUp()
+        if text is not None:
+            self.className = text
+            QMessageBox.information(self.labelListContainer, 'Message', "Image classification : %s" % (self.className))
+            self.setDirty()
+
 
     def setCreateMode(self):
         assert self.advanced()
@@ -559,12 +573,16 @@ class MainWindow(QMainWindow, WindowMixin):
                                 if s.fill_color != self.fillColor else None,
                         points=[(p.x(), p.y()) for p in s.points])
 
-        shapes = [format_shape(shape) for shape in self.canvas.shapes]
+        if len(self.canvas.shapes) == 0:
+            shapes = []
+        else:
+            shapes = [format_shape(shape) for shape in self.canvas.shapes]
+
         # Can add differrent annotation formats here
         try:
             if self.usingPascalVocFormat is True:
                 print 'savePascalVocFormat save to:' + filename
-                lf.savePascalVocFormat(filename, shapes, unicode(self.filename), self.imageData,
+                lf.savePascalVocFormat(filename, shapes, unicode(self.className), unicode(self.filename), self.imageData,
                     self.lineColor.getRgb(), self.fillColor.getRgb())
             else:
                 lf.save(filename, shapes, unicode(self.filename), self.imageData,
@@ -908,6 +926,7 @@ class MainWindow(QMainWindow, WindowMixin):
                 savedPath = os.path.join(str(self.defaultSaveDir), savedFileName)
                 self._saveFile(savedPath)
             else:
+                # print unicode(self.className)
                 self._saveFile(self.filename if self.labelFile\
                                          else self.saveFileDialog())
 
@@ -949,7 +968,7 @@ class MainWindow(QMainWindow, WindowMixin):
 
     # Message Dialogs. #
     def hasLabels(self):
-        if not self.itemsToShapes:
+        if not self.itemsToShapes and not self.className:
             self.errorMessage(u'No objects labeled',
                     u'You must label at least one object to save the file.')
             return False

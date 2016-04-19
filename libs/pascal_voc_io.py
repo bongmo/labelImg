@@ -5,12 +5,13 @@ from xml.dom import minidom
 from lxml import etree
 
 class PascalVocWriter:
-    def __init__(self, foldername, filename, imgSize, databaseSrc='Unknown', localImgPath=None):
+    def __init__(self, foldername, filename, imgSize, className, databaseSrc='Unknown', localImgPath=None):
         self.foldername = foldername
         self.filename = filename
         self.databaseSrc = databaseSrc
         self.imgSize = imgSize
         self.boxlist = []
+        self.className = className
         self.localImgPath = localImgPath
 
     def prettify(self, elem):
@@ -28,8 +29,8 @@ class PascalVocWriter:
         # Check conditions
         if self.filename is None or \
                 self.foldername is None or \
-                self.imgSize is None or \
-                len(self.boxlist) <= 0:
+                self.imgSize is None:
+#                len(self.boxlist) <= 0:
                     return None
 
         top = Element('annotation')
@@ -88,8 +89,13 @@ class PascalVocWriter:
             ymax = SubElement(bndbox, 'ymax')
             ymax.text = str(each_object['ymax'])
 
+    def createLabelObjects(self, top):
+        object_item = SubElement(top, 'class')
+        object_item.text = self.className
+
     def save(self, targetFile = None):
         root = self.genXML()
+        self.createLabelObjects(root)
         self.appendObjects(root)
         out_file = None
         if targetFile is None:
