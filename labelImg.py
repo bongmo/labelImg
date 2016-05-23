@@ -145,13 +145,13 @@ class MainWindow(QMainWindow, WindowMixin):
                 'Ctrl+q', 'openAnnotation', u'Open Annotation')
 
         openNextImg = action('&Next Image', self.openNextImg,
-                'n', 'next', u'Open Next')
+                ']', 'next', u'Open Next')
 
         openPrevImg = action('&Prev Image', self.openPrevImg,
-                'p', 'prev', u'Open Prev')
+                '[', 'prev', u'Open Prev')
 
         save = action('&Save', self.saveFile,
-                'Ctrl+S', 'save', u'Save labels to file', enabled=False)
+                'o', 'save', u'Save labels to file', enabled=False)
         saveAs = action('&Save As', self.saveFileAs,
                 'Ctrl+Shift+S', 'save-as', u'Save labels to a different file',
                 enabled=False)
@@ -166,12 +166,12 @@ class MainWindow(QMainWindow, WindowMixin):
                 'Ctrl+G', 'label', u'Create label information', enabled=False)
 
         createMode = action('Create\nRectBox', self.setCreateMode,
-                'Ctrl+N', 'new', u'Start drawing Boxs', enabled=False)
+                'p', 'new', u'Start drawing Boxs', enabled=False)
         editMode = action('&Edit\nRectBox', self.setEditMode,
                 'Ctrl+J', 'edit', u'Move and edit Boxs', enabled=False)
 
         create = action('Create\nRectBox', self.createShape,
-                'Ctrl+N', 'new', u'Draw a new Box', enabled=False)
+                'p', 'new', u'Draw a new Box', enabled=False)
         delete = action('Delete\nRectBox', self.deleteSelectedShape,
                 'Delete', 'delete', u'Delete', enabled=False)
         copy = action('&Duplicate\nRectBox', self.copySelectedShape,
@@ -573,11 +573,7 @@ class MainWindow(QMainWindow, WindowMixin):
                                 if s.fill_color != self.fillColor else None,
                         points=[(p.x(), p.y()) for p in s.points])
 
-        if len(self.canvas.shapes) == 0:
-            shapes = []
-        else:
-            shapes = [format_shape(shape) for shape in self.canvas.shapes]
-
+        shapes = [format_shape(shape) for shape in self.canvas.shapes]
         # Can add differrent annotation formats here
         try:
             if self.usingPascalVocFormat is True:
@@ -724,7 +720,7 @@ class MainWindow(QMainWindow, WindowMixin):
             ## Label xml file and show bound box according to its filename
             if self.usingPascalVocFormat is True and \
                     self.defaultSaveDir is not None:
-                    basename = os.path.basename(self.filename).split('.')[:-1][0]
+                    basename = os.path.basename(os.path.splitext(self.filename)[0])
                     xmlPath = os.path.join(self.defaultSaveDir, basename + '.xml')
                     self.loadPascalXMLByFilename(xmlPath)
 
