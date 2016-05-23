@@ -8,6 +8,18 @@ The annotation file will be saved as a XML file. The annotation format is PASCAL
 
 ![](icons/demo.png)
 
+### Hotkeys
+
+* Ctrl + r : Change the defult target dir which saving annotation files
+
+* p : Create a bounding box
+
+* o : Save
+
+* ] : Next image
+
+* [ : Previous image
+
 ## Dependencies
 * Linux/Ubuntu/Mac
 
@@ -57,18 +69,6 @@ You can edit the [data/predefined_classes.txt](https://github.com/tzutalin/label
 * Click 'Create RectBox'
 
 The annotation will be saved to the folder you specifiy
-
-### Hotkeys
-
-* Ctrl + r : Change the defult target dir which saving annotation files
-
-* Ctrl + n : Create a bounding box
-
-* Ctrl + s : Save
-
-* n : Next image
-
-* p : Previous image
 
 ### How to contribute
 Send a pull request and help me write setup.py to build executable file for all platforms.
