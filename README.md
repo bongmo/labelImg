@@ -36,7 +36,31 @@ In order to build the resource and assets, you need to install pyqt4-dev-tools:
 
 * Windows
 
-Need to download and setup [Python 2.6](https://www.python.org/downloads/windows/) or later and [PyQt4](https://www.riverbankcomputing.com/software/pyqt/download). You can also try to download the whole neccessary executable files from [my drive](https://copy.com/oyYjFzJwPb4tKl93) and install them.
+Need to download and setup [Python 2.7](https://www.python.org/downloads/windows/) or later and [PyQt4](http://www.lfd.uci.edu/~gohlke/pythonlibs/#pyqt4).
+
+Follow steps below.
+
+1. Install Python 2.7 or later. We recommend to install Python 2.7.9 or later.
+
+2. Install pip for Windows. If you have Python 2 >=2.7.9 or Python 3 >=3.4 installed from python.org, you will already have pip and setuptools, but will need to upgrade to the latest version:
+
+`$ python -m pip install -U pip setuptools`
+
+3. Install PyQt4. Download PyQt4 .whl from (http://www.lfd.uci.edu/~gohlke/pythonlibs/#pyqt4)
+
+`$ pip install PyQt4-4.11.4-cp27-none-win_amd64.whl`
+
+4. Install numpy
+
+`$ pip install numpy`
+
+5. Install opencv for python
+
+`$ pip install python-opencv`
+
+6. Install lxml. Download lxml file in a similar way to pyqt4(Step 3). If you have error with MSVC 9.0, Download (https://www.microsoft.com/en-us/download/confirmation.aspx?id=44266)
+
+`$ pip install lxml-3.6.4-cp27-cp27m-win_amd64.whl`
 
 Open cmd and go to $labelImg, 
 
