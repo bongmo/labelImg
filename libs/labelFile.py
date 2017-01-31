@@ -64,6 +64,7 @@ class LabelFile(object):
         writer = PascalVocWriter(imgFolderName, imgFileNameWithoutExt,\
                                  imageShape, className, localImgPath=imagePath)
         bSave = False
+        print (className, filename, shapes, imagePath, )
         if className:
             bSave = True
 

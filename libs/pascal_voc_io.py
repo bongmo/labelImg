@@ -3,6 +3,7 @@ from xml.etree import ElementTree
 from xml.etree.ElementTree import Element, SubElement
 from xml.dom import minidom
 from lxml import etree
+import json
 
 class PascalVocWriter:
     def __init__(self, foldername, filename, imgSize, className, databaseSrc='Unknown', localImgPath=None):
@@ -13,6 +14,10 @@ class PascalVocWriter:
         self.boxlist = []
         self.className = className
         self.localImgPath = localImgPath
+        self.top = {}
+        self.region_ids = {}
+        self.top['id'] = self.filename
+        self.top['regions'] = []
 
     def prettify(self, elem):
         """
@@ -22,90 +27,42 @@ class PascalVocWriter:
         reparsed = minidom.parseString(rough_string)
         return reparsed.toprettyxml(indent="\t")
 
-    def genXML(self):
+    def genJSON(self):
         """
-            Return XML root
+            Return JSON root
         """
         # Check conditions
         if self.filename is None or \
                 self.foldername is None or \
                 self.imgSize is None:
-#                len(self.boxlist) <= 0:
                     return None
 
-        top = Element('annotation')
-        folder = SubElement(top,'folder')
-        folder.text = self.foldername
-
-        filename = SubElement(top,'filename')
-        filename.text = self.filename
-
-        localImgPath = SubElement(top,'path')
-        localImgPath.text = self.localImgPath
-
-        source = SubElement(top,'source')
-        database = SubElement(source,'database')
-        database.text = self.databaseSrc
-
-        size_part = SubElement(top,'size')
-        width = SubElement(size_part,'width')
-        height = SubElement(size_part,'height')
-        depth = SubElement(size_part,'depth')
-        width.text = str(self.imgSize[1])
-        height.text = str(self.imgSize[0])
-        if len(self.imgSize)==3:
-            depth.text = str(self.imgSize[2])
-        else:
-            depth.text = '1'
-
-        segmented = SubElement(top,'segmented')
-        segmented.text ='0'
-
-        return top
+        return self.top
 
     def addBndBox(self, xmin, ymin, xmax, ymax, name):
-        bndbox = {'xmin':xmin, 'ymin':ymin, 'xmax':xmax, 'ymax':ymax}
-        bndbox['name'] = name
+        bndbox = {u'x':xmin, u'y':ymin, u'width':xmax-xmin, u'height':ymax-ymin, u'region_id' : 0, u'image_id': self.top['id']}
+        bndbox['phrase'] = name
         self.boxlist.append(bndbox);
 
     def appendObjects(self, top):
-        for each_object in self.boxlist:
-            object_item = SubElement(top,'object')
-            name = SubElement(object_item, 'name')
-            name.text = str(each_object['name'])
-            pose = SubElement(object_item, 'pose')
-            pose.text = "Unspecified"
-            truncated = SubElement(object_item, 'truncated')
-            truncated.text = "0"
-            difficult = SubElement(object_item, 'difficult')
-            difficult.text = "0"
-            bndbox = SubElement(object_item, 'bndbox')
-            xmin = SubElement(bndbox, 'xmin')
-            xmin.text = str(each_object['xmin'])
-            ymin = SubElement(bndbox, 'ymin')
-            ymin.text = str(each_object['ymin'])
-            xmax = SubElement(bndbox, 'xmax')
-            xmax.text = str(each_object['xmax'])
-            ymax = SubElement(bndbox, 'ymax')
-            ymax.text = str(each_object['ymax'])
+        self.top['regions'] = self.boxlist
+            
 
     def createLabelObjects(self, top):
         object_item = SubElement(top, 'class')
         object_item.text = self.className
 
     def save(self, targetFile = None):
-        root = self.genXML()
-        self.createLabelObjects(root)
+        root = self.genJSON()
         self.appendObjects(root)
+        
         out_file = None
         if targetFile is None:
-            out_file = open(self.filename + '.xml','w')
+            with open(self.filename + '.json','w') as out_file:
+                json.dump(self.top, out_file)
         else:
-            out_file = open(targetFile, 'w')
-
-        out_file.write(self.prettify(root))
-        out_file.close()
-
+            with open(targetFile, 'w') as out_file:
+                json.dump(self.top, out_file)
 
 class PascalVocReader:
 
@@ -124,22 +81,24 @@ class PascalVocReader:
         ymin = rect[1]
         xmax = rect[2]
         ymax = rect[3]
-        points = [(xmin,ymin), (xmin,ymax), (xmax, ymax), (xmax, ymin)]
+        points = [(xmin,ymin), (xmin,ymin+ymax), (xmin+xmax, ymin+ymax), (xmin+xmax, ymin)]
         self.shapes.append((label, points, None, None))
 
     def parseXML(self):
-        assert self.filepath.endswith('.xml'), "Unsupport file format"
-        xmltree = ElementTree.parse(self.filepath).getroot()
-        filename = xmltree.find('filename').text
+        assert self.filepath.endswith('.json'), "Unsupport file format"
+        data = ''
+        with open(self.filepath, 'r') as f:
+            data = json.load(f)
+        filename = data['id'] + '.jpg'
+        for region in data['regions']:
+            label = region['phrase']
+            rect = []
+            rect.append(region['x'])
+            rect.append(region['y'])
+            rect.append(region['width'])
+            rect.append(region['height'])
+            self.addShape(label, rect)
 
-        for object_iter in xmltree.findall('object'):
-           rects = []
-           bndbox = object_iter.find("bndbox")
-           rects.append([int(it.text) for it in bndbox])
-           label = object_iter.find('name').text
-
-           for rect in rects:
-               self.addShape(label, rect)
         return True
 
 

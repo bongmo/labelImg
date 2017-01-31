@@ -56,7 +56,7 @@ class MainWindow(QMainWindow, WindowMixin):
         self.defaultSaveDir = None
         self.usingPascalVocFormat = True
         if self.usingPascalVocFormat:
-            LabelFile.suffix = '.xml'
+            LabelFile.suffix = '.json'
         # For loading all image under a directory
         self.mImgList = []
         self.dirname = None
@@ -530,7 +530,7 @@ class MainWindow(QMainWindow, WindowMixin):
         self.actions.edit.setEnabled(selected)
         self.actions.shapeLineColor.setEnabled(selected)
         self.actions.shapeFillColor.setEnabled(selected)
-        print 'shapeSelectionChanged'
+
 
     def addLabel(self, shape):
         item = QListWidgetItem(shape.label)
@@ -721,7 +721,7 @@ class MainWindow(QMainWindow, WindowMixin):
             if self.usingPascalVocFormat is True and \
                     self.defaultSaveDir is not None:
                     basename = os.path.basename(os.path.splitext(self.filename)[0])
-                    xmlPath = os.path.join(self.defaultSaveDir, basename + '.xml')
+                    xmlPath = os.path.join(self.defaultSaveDir, basename + '.json')
                     self.loadPascalXMLByFilename(xmlPath)
 
             return True
@@ -833,10 +833,10 @@ class MainWindow(QMainWindow, WindowMixin):
         if self.usingPascalVocFormat:
             formats = ['*.%s' % unicode(fmt).lower()\
                     for fmt in QImageReader.supportedImageFormats()]
-            filters = "Open Annotation XML file (%s)" % \
-                    ' '.join(formats + ['*.xml'])
+            filters = "Open Annotation JSON file (%s)" % \
+                    ' '.join(formats + ['*.json'])
             filename = unicode(QFileDialog.getOpenFileName(self,
-                '%s - Choose a xml file' % __appname__, path, filters))
+                '%s - Choose a JSON file' % __appname__, path, filters))
             self.loadPascalXMLByFilename(filename)
 
     def openDir(self, _value=False):
