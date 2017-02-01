@@ -1,5 +1,5 @@
-dog
-person
-cat
-tv
-car
+woman standing
+man standing
+man sitting
+woman sitting
+baby lying
