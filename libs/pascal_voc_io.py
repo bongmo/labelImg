@@ -40,7 +40,8 @@ class PascalVocWriter:
         return self.top
 
     def addBndBox(self, xmin, ymin, xmax, ymax, name):
-        bndbox = {u'x':xmin, u'y':ymin, u'width':xmax-xmin, u'height':ymax-ymin, u'region_id' : 0, u'image_id': self.top['id']}
+        rid = str( int(self.top['id']) * 10 + len(self.boxlist) )
+        bndbox = {u'x':xmin, u'y':ymin, u'width':xmax-xmin, u'height':ymax-ymin, u'region_id' : rid, u'image_id': self.top['id']}
         bndbox['phrase'] = name
         self.boxlist.append(bndbox);
 
