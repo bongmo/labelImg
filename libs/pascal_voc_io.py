@@ -16,7 +16,7 @@ class PascalVocWriter:
         self.localImgPath = localImgPath
         self.top = {}
         self.region_ids = {}
-        self.top['id'] = self.filename
+        self.top['id'] = int(self.filename)
         self.top['regions'] = []
 
     def prettify(self, elem):
@@ -40,8 +40,8 @@ class PascalVocWriter:
         return self.top
 
     def addBndBox(self, xmin, ymin, xmax, ymax, name):
-        rid = str( int(self.top['id']) * 10 + len(self.boxlist) )
-        bndbox = {u'x':xmin, u'y':ymin, u'width':xmax-xmin, u'height':ymax-ymin, u'region_id' : rid, u'image_id': self.top['id']}
+        rid = int( int(self.top['id']) * 10 + len(self.boxlist) )
+        bndbox = {u'x':xmin, u'y':ymin, u'width':xmax-xmin, u'height':ymax-ymin, u'region_id' : rid, u'image_id': int(self.top['id'])}
         bndbox['phrase'] = name
         self.boxlist.append(bndbox);
 
@@ -90,7 +90,7 @@ class PascalVocReader:
         data = ''
         with open(self.filepath, 'r') as f:
             data = json.load(f)
-        filename = data['id'] + '.jpg'
+        filename = str(data['id']) + '.jpg'
         for region in data['regions']:
             label = region['phrase']
             rect = []
